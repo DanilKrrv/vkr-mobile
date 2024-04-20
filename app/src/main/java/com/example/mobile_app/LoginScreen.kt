@@ -36,6 +36,12 @@ fun LoginScreen(navController: NavController) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var showErrorDialog by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+
+    fun isValidInput(input: String): Boolean {
+        val regex = Regex("^[a-zA-Z0-9]{8,12}$")
+        return regex.matches(input)
+    }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -51,24 +57,39 @@ fun LoginScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        OutlinedTextField(value = username, onValueChange = {username = it}, label = {
-            Text(text = "Логин")
-        })
+        OutlinedTextField(
+            value = username,
+            onValueChange = { username = it },
+            label = { Text(text = "Логин") },
+            isError = showErrorDialog,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        OutlinedTextField(value = password, onValueChange = {password = it}, label = {
-            Text(text = "Пароль")
-        }, visualTransformation = PasswordVisualTransformation())
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text(text = "Пароль") },
+            visualTransformation = PasswordVisualTransformation(),
+            isError = showErrorDialog,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
 
         Spacer(modifier = Modifier.height(18.dp))
 
 
         Button(
             onClick = {
-                if (username == "test" && password == "test") {
-                    navController.navigate("main")
+                if (isValidInput(username) && isValidInput(password)) {
+                    if (username == "test1111" && password == "test1111") {
+                        navController.navigate("main")
+                    } else {
+                        errorMessage = "Неправильный логин или пароль"
+                        showErrorDialog = true
+                    }
                 } else {
+                    errorMessage = "Некорректный логин или пароль"
                     showErrorDialog = true
                 }
             },
@@ -76,9 +97,9 @@ fun LoginScreen(navController: NavController) {
                 .height(50.dp)
                 .width(120.dp),
             colors = ButtonDefaults.buttonColors(
-                contentColor = Color.White,       // цвет текста
+                contentColor = Color.White,
                 containerColor = Color(0xFF0357A6)
-            )     // цвет фона
+            )
         ) {
             Text(text = "Войти", fontSize = 18.sp)
         }
@@ -88,7 +109,7 @@ fun LoginScreen(navController: NavController) {
         AlertDialog(
             onDismissRequest = { showErrorDialog = false },
             title = { Text("Ошибка") },
-            text = { Text("Неправильный логин или пароль") },
+            text = { Text(errorMessage) },
             confirmButton = {
                 Button(
                     onClick = { showErrorDialog = false },
